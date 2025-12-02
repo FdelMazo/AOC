@@ -28,8 +28,8 @@ def day_one():
         curr = curr + (val % 100)
         invariant(oldcurr, val)
 
-    with open('input-day-one') as input:
-        for line in input:
+    with open('input-day-one') as f:
+        for line in f:
             oldcurr = curr
             if line[0] == 'R':
                 right(int(line[1:]))
@@ -37,6 +37,6 @@ def day_one():
                 left(int(line[1:]))
             # print(f"{line.strip()}: {oldcurr} -> {curr} -- end: {end}, rot: {rot}")
 
-        print(f"dial ends at zero {end} times")
-        print(f"dial rotated through zero {rot} times")
-        print(f"dial clicked at zero {end+rot} total times")
+    print(f"dial ends at zero {end} times")
+    print(f"dial rotated through zero {rot} times")
+    print(f"dial clicked at zero {end+rot} total times")
