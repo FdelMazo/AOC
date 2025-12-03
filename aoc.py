@@ -71,3 +71,20 @@ def day_two():
 
     print(f"(easy) sum of invalid ids {sum(invalid_easy)}")
     print(f"(hard) sum of invalid ids {sum(invalid_hard)}")
+
+def day_three():
+    r = 0
+    n = 12 # 2 = easy ; 12 = hard
+    with open('input-day-three') as file:
+        for line in file:
+            digits = [int(d) for d in line.strip()]
+            number = ""
+            for _ in range(n):
+                to_remove = -(n-len(number)-1)
+                m = max(digits if to_remove == 0 else digits[:to_remove])
+                number += str(m)
+                digits = digits[digits.index(m)+1:]
+
+            s = int(number)
+            r += s
+    print (r)
