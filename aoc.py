@@ -88,3 +88,56 @@ def day_three():
             s = int(number)
             r += s
     print (r)
+
+def day_four():
+    matrix = []
+    def get_adj(r, c):
+        adj = []
+
+        def _get_adj_in_row(row, c, skip_self = False):
+            _adj = []
+            if (c != 0):
+                _adj.append(matrix[row][c-1])
+
+            if (not skip_self):
+                _adj.append(matrix[row][c])
+
+            if (c != len(matrix[row]) - 1):
+                _adj.append(matrix[row][c+1])
+
+            return _adj
+
+        if r != 0:
+            adj.extend(_get_adj_in_row(r - 1, c))
+
+        adj.extend(_get_adj_in_row(r, c, True))
+
+        if r != len(matrix) - 1:
+            adj.extend(_get_adj_in_row(r + 1, c))
+
+        return adj
+
+    with open('inputs/4') as file:
+        for line in file:
+            matrix.append(list(line.strip()))
+
+    removable_rolls_step = 0
+    for r, row in enumerate(matrix):
+        for c, ch in enumerate(row):
+            if ch == '@' and len([x for x in get_adj(r, c) if x == '@']) < 4:
+                removable_rolls_step += 1
+
+    print(f"as a first step, {removable_rolls_step} rolls can be removed")
+
+    removable_rolls = 0
+    while (removable_rolls_step > 0):
+        removable_rolls_step = 0
+        for r, row in enumerate(matrix):
+            for c, ch in enumerate(row):
+                if ch == '@' and len([x for x in get_adj(r, c) if x == '@']) < 4:
+                    removable_rolls_step += 1
+                    matrix[r][c] = '.'
+
+        removable_rolls += removable_rolls_step
+
+    print(f"in total, {removable_rolls} rolls can be removed")
