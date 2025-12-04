@@ -28,7 +28,7 @@ def day_one():
         curr = curr + (val % 100)
         invariant(oldcurr, val)
 
-    with open('input-day-one') as f:
+    with open('inputs/1') as f:
         for line in f:
             oldcurr = curr
             if line[0] == 'R':
@@ -45,7 +45,7 @@ def day_two():
     invalid_easy = set()
     invalid_hard = set()
 
-    with open('input-day-two') as f:
+    with open('inputs/2') as f:
         ranges = f.read().split(',')
 
     def split_n_ways(lst, n):
@@ -75,7 +75,7 @@ def day_two():
 def day_three():
     r = 0
     n = 12 # 2 = easy ; 12 = hard
-    with open('input-day-three') as file:
+    with open('inputs/3') as file:
         for line in file:
             digits = [int(d) for d in line.strip()]
             number = ""
