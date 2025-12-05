@@ -141,3 +141,44 @@ def day_four():
         removable_rolls += removable_rolls_step
 
     print(f"in total, {removable_rolls} rolls can be removed")
+
+def day_five():
+    fresh = []
+    available = []
+    ingredients = 0
+
+    is_fresh = True
+    with open('inputs/5') as file:
+        for line in file:
+            if (len(line.strip()) == 0):
+                is_fresh = False
+                continue
+
+            if (is_fresh):
+                [s, f] = line.strip().split('-')
+                s, f = int(s), int(f)
+                if (f >= s): fresh.append([s, f])
+            else:
+                available.append(int(line.strip()))
+
+    fresh = sorted(fresh)
+    fresh_undup = [fresh[0]]
+
+    for s, f in fresh[1:]:
+        top = fresh_undup[-1][1]
+        if (s <= top and f > top):
+            fresh_undup[-1][1] = f
+        elif s > top:
+            fresh_undup.append([s, f])
+
+    for ing in available:
+        for s, f in fresh:
+            if (ing >= s and ing <= f):
+                ingredients += 1
+                break
+
+
+    sums = [f - s + 1 for s, f in fresh_undup]
+
+    print(f"{ingredients} available ingredients")
+    print(f"{sum(sums)} total fresh ingredients")
