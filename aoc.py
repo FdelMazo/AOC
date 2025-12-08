@@ -236,3 +236,33 @@ def day_six():
             res += reduce(lambda x, y: x * y, op[1:], 1)
 
     print(f"knowing cephalopod math, the answer is {res}")
+
+def day_seven():
+    with open('inputs/7') as file:
+        lines = file.readlines()
+        beams = [0 for _ in range(1, len(lines[0]))]
+        beams[lines[0].index('S')] = 1
+        splits = 0
+
+        for line in lines:
+            line = line.strip()
+            if '^' not in line:
+                # print(''.join([ch if b == 0 else str(b) for ch, b in zip(line, beams)]))
+                continue
+
+            splitters_indices = set([i for i, x in enumerate(line) if x == "^"])
+            splitters = [1 if i in splitters_indices else 0 for i in range(len(beams))]
+
+            hits = [b if s == 1 else 0 for s, b in zip(splitters, beams)]
+
+            for i, h in list(enumerate(hits)):
+                if h:
+                    splits += 1
+                    beams[i-1] += h
+                    beams[i]    = 0
+                    beams[i+1] += h
+
+            # print(''.join([ch if b == 0 else str(b) for ch, b in zip(line, beams)]))
+
+    print(f"there were {splits} splits")
+    print(f"there are {sum(beams)} total timelines")
