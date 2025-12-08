@@ -1,3 +1,5 @@
+from functools import reduce
+
 def day_one():
     end = 0 # Times the dial ends at zero
     rot = 0 # Times the dial rotates through zero
@@ -182,3 +184,55 @@ def day_five():
 
     print(f"{ingredients} available ingredients")
     print(f"{sum(sums)} total fresh ingredients")
+
+def day_six():
+    matrix = []
+    with open('inputs/6') as file:
+        max_number_length = len(max(file.read().split(), key=lambda x: len(x)))
+
+    with open('inputs/6') as file:
+        last_line = file.readlines()[-1].strip('\n')
+        groups = []
+        for ch in last_line:
+            if (ch != ' '):
+                groups.append(0)
+            else:
+                groups[-1] = groups[-1] + 1
+        groups[-1] = max_number_length
+
+    with open('inputs/6') as file:
+        for line in file:
+            line = line.strip('\n')
+            numbers = []
+            i = 0
+            for g in groups:
+                number = line[i:i+g]
+                for _ in range(g - len(number)): number += ' '
+                numbers.append(number)
+                i+=g+1
+            matrix.append([n for n in numbers])
+
+    matrix = list(zip(*matrix))
+    res = 0
+    simple_matrix = [[op[-1].strip(), *[int(n.strip()) for n in op[:-1]]] for op in matrix]
+    for op in simple_matrix:
+        if (op[0] == '+'):
+            res += reduce(lambda x, y: x + y, op[1:], 0)
+        if (op[0] == '*'):
+            res += reduce(lambda x, y: x * y, op[1:], 1)
+
+    print(f"without knowing cephalopod math, the answer is {res}")
+
+    res = 0
+    def get_cephalod_numbers(m):
+        new_m = list(zip(*m))
+        return [int(''.join(n).strip()) for n in new_m]
+
+    hard_matrix = [[op[-1].strip(), *get_cephalod_numbers(op[:-1])] for op in matrix]
+    for op in hard_matrix:
+        if (op[0] == '+'):
+            res += reduce(lambda x, y: x + y, op[1:], 0)
+        if (op[0] == '*'):
+            res += reduce(lambda x, y: x * y, op[1:], 1)
+
+    print(f"knowing cephalopod math, the answer is {res}")
