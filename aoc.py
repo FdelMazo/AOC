@@ -1,3 +1,4 @@
+from math import sqrt, inf
 from functools import reduce
 
 def day_one():
@@ -266,3 +267,64 @@ def day_seven():
 
     print(f"there were {splits} splits")
     print(f"there are {sum(beams)} total timelines")
+
+def day_eight():
+    nodes = []
+    with open('inputs/8') as file:
+        for line in file:
+            nodes.append(tuple(int(n) for n in line.strip().split(',')))
+
+    distances = [[inf for _ in range(len(nodes))] for _ in range(len(nodes))]
+
+    def D(n1, n2):
+        x1, y1, z1 = n1
+        x2, y2, z2 = n2
+        return sqrt((x1 - x2)**2+(y1 - y2)**2+(z1 - z2)**2)
+
+    for i, n1 in enumerate(nodes):
+        for j, n2 in enumerate(nodes):
+            if (i != j): distances[i][j] = D(n1, n2)
+
+    def M():
+        m_row = min(distances, key=lambda x: min(x))
+        r = distances.index(m_row)
+        m_col = min(m_row)
+        c = m_row.index(m_col)
+        return (r, c)
+
+    groups = []
+    i = 1
+    while True:
+        r, c = M()
+        distances[r][c] = inf
+        distances[c][r] = inf
+        n1, n2 = nodes[r], nodes[c]
+
+        hit_groups = [g for g in groups if n1 in g or n2 in g]
+        if not len(hit_groups):
+            groups.append(set([n1, n2]))
+        else:
+            merged = set([n1, n2])
+            for hg in hit_groups:
+                groups.remove(hg)
+                merged = merged.union(hg)
+            groups.append(merged)
+
+        n = 10
+        if (i == n):
+            groups = [sorted(g) for g in groups]
+            groups = sorted(groups, key=lambda x: -len(x))
+            print(f"after connecting {n} junction boxes, this are the top 3 groups lengths {'*'.join([str(len(g)) for g in groups[:3]])} = {reduce(lambda x, y: x*y, [len(g) for g in groups[:3]], 1)}")
+
+        n = 1000
+        if (i == n):
+            groups = [sorted(g) for g in groups]
+            groups = sorted(groups, key=lambda x: -len(x))
+            print(f"after connecting {n} junction boxes, this are the top 3 groups lengths {'*'.join([str(len(g)) for g in groups[:3]])} = {reduce(lambda x, y: x*y, [len(g) for g in groups[:3]], 1)}")
+
+
+        if (len(groups) == 1 and len(groups[0]) == len(nodes)):
+            print(f"finally got everything on the same group. last connection: {(n1,n2)} -> x1*x2={n1[0]*n2[0]}")
+            break
+
+        i += 1
