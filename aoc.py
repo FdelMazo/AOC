@@ -1,3 +1,11 @@
+# /// script
+# dependencies = [
+#   "numpy",
+# ]
+# ///
+
+import numpy as np
+from bisect import bisect_right
 from math import sqrt, inf
 from functools import reduce
 
@@ -328,3 +336,94 @@ def day_eight():
             break
 
         i += 1
+
+def day_nine():
+    red_tiles = []
+    with open('inputs/9') as file:
+        for line in file:
+            a, b = line.strip().split(',')
+            red_tiles.append((int(a), int(b)))
+
+    areas = np.zeros((len(red_tiles), len(red_tiles)))
+
+    def A(a, b):
+        x1, y1 = a
+        x2, y2 = b
+        return (abs(y2-y1)+1) * (abs(x2-x1)+1)
+
+    def M():
+        amax = areas.argmax()
+        idx = np.unravel_index(amax, areas.shape)
+        return areas[idx], idx
+
+    for i, n1 in enumerate(red_tiles):
+        for j, n2 in enumerate(red_tiles):
+            if (i > j):
+                areas[i, j] = A(n1, n2)
+
+    a, (r, c) = M()
+    print(f"largest possible rectangle has corners {red_tiles[r]} and {red_tiles[c]}, with area={a}")
+
+    perimeter = set()
+    verticals = {}
+
+    for i, n in enumerate(red_tiles):
+        adj = red_tiles[i+1] if i < len(red_tiles) - 1 else red_tiles[0]
+        x1, y1 = n
+        x2, y2 = adj
+
+        if y1 == y2:
+            mn, mx = min(x1, x2), max(x1, x2)
+            for xx in range(mn, mx+1):
+                perimeter.add((xx, y1))
+        else:
+            mn, mx = min(y1, y2), max(y1, y2)
+            # ray-casting crossings (half-open)
+            for y in range(mn, mx):
+                verticals.setdefault(y, []).append(x1)
+
+            # perimeter (closed)
+            for y in range(mn, mx + 1):
+                perimeter.add((x1, y))
+
+    for y in verticals: verticals[y].sort()
+
+    def point_in_polygon(x, y):
+        xs = verticals.get(y)
+        if not xs:
+            return False
+        return bisect_right(xs, x) % 2 == 1
+
+
+    def rect_perimeter(n1, n2):
+        x1, y1 = n1
+        x2, y2 = n2
+        xmin, xmax = sorted((x1, x2))
+        ymin, ymax = sorted((y1, y2))
+
+        # bottom + top
+        for x in range(xmin, xmax + 1):
+            yield (x, ymin)
+            yield (x, ymax)
+
+        # left + right (skip corners)
+        for y in range(ymin + 1, ymax):
+            yield (xmin, y)
+            yield (xmax, y)
+
+    def is_valid(n1, n2):
+        for x, y in rect_perimeter(n1, n2):
+            if (x, y) in perimeter:
+                continue
+            if not point_in_polygon(x, y):
+                return False
+        return True
+
+    is_rect_valid = False
+    while not is_rect_valid:
+        a, (r, c) = M()
+        # print(f"Testing {red_tiles[r]}, {red_tiles[c]} = {a}")
+        areas[r, c] = 0
+        is_rect_valid = is_valid(red_tiles[r], red_tiles[c])
+
+    print(f"largest possible rectangle, filled with colored tiles, has corners {red_tiles[r]} and {red_tiles[c]}, with area={a}")
