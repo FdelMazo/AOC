@@ -8,6 +8,7 @@
 import re
 import numpy as np
 import z3
+import functools
 
 from itertools import combinations
 from collections import Counter
@@ -476,3 +477,47 @@ def day_ten():
 
     r = sum([check_joltage(*m) for m in machines])
     print(f"The fewest total presses required to configure every machine joltage is {r}")
+
+def day_eleven():
+    graph = {}
+    with open("inputs/11a") as file:
+        for line in file:
+            [flowin, flowout] = line.split(':')
+            graph[flowin] = [f.strip() for f in flowout.split(' ') if f]
+
+    paths_you_out = [['you']]
+    while not all(['out' in p for p in paths_you_out]):
+        for p in paths_you_out:
+            top = p[-1]
+            if (top == 'out'): continue
+            flows = graph[top]
+            p.append(flows[0])
+            if len(flows) > 1:
+                for f in flows[1:]:
+                    paths_you_out.append([*p, f])
+
+    print(f"There are {len(paths_you_out)} from 'you' to 'out'")
+
+    graph = {}
+    with open("inputs/11b") as file:
+        for line in file:
+            [flowin, flowout] = line.split(':')
+            graph[flowin] = [f.strip() for f in flowout.split(' ') if f]
+    graph['out'] = []
+
+
+    @functools.cache
+    def calc_paths(s, d):
+        if s == d: return 1
+        n = 0
+        for o in graph[s]:
+            n += calc_paths(o, d)
+        return n
+
+    # after manual testing, its confirmed dac comes after fft
+    paths_svr_fft = calc_paths('svr', 'fft')
+    paths_fft_dac = calc_paths('fft', 'dac')
+    paths_dac_out = calc_paths('dac', 'out')
+
+    res = paths_svr_fft * paths_fft_dac * paths_dac_out
+    print(f"There are {res} paths from 'svr' to 'out' that go through both 'fft' and 'dac'")
