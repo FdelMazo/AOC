@@ -521,3 +521,37 @@ def day_eleven():
 
     res = paths_svr_fft * paths_fft_dac * paths_dac_out
     print(f"There are {res} paths from 'svr' to 'out' that go through both 'fft' and 'dac'")
+
+def day_twelve():
+    with open("inputs/12") as file:
+        contents = file.read()
+        presents = re.findall(r"\d:\n((?:[\.#]+\n)+)", contents)
+        presents = [p.split('\n') for p in presents]
+        presents = [[px for px in p if px] for p in presents]
+        presents = [[px.replace('#', '1').replace('.', '0') for px in p if px] for p in presents]
+        presents = [[[int(pxx) for pxx in px] for px in p if px] for p in presents]
+        presents = [np.matrix(p) for p in presents]
+
+        trees = re.findall(r"(\d+x\d+): (.*)", contents)
+        trees = [((int(d.split('x')[0]), int(d.split('x')[1])), [int(n) for n in ns.split(' ')]) for d, ns in trees]
+
+        print(trees)
+
+    area = lambda w,d: w*d
+    shapes_area = lambda shapes: sum([s*9 for s in shapes])
+
+    res = len([1 for (w, d), shapes in trees if area(w,d) >= shapes_area(shapes)])
+    print(f"Naively, at least {res} trees have the correct shape")
+
+day_one()
+day_two()
+day_three()
+day_four()
+day_five()
+day_six()
+day_seven()
+day_eight()
+day_nine()
+day_ten()
+day_eleven()
+day_twelve()
