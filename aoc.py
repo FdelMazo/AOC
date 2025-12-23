@@ -1,10 +1,16 @@
 # /// script
 # dependencies = [
 #   "numpy",
+#   "z3-solver",
 # ]
 # ///
 
+import re
 import numpy as np
+import z3
+
+from itertools import combinations
+from collections import Counter
 from bisect import bisect_right
 from math import sqrt, inf
 from functools import reduce
@@ -427,3 +433,46 @@ def day_nine():
         is_rect_valid = is_valid(red_tiles[r], red_tiles[c])
 
     print(f"largest possible rectangle, filled with colored tiles, has corners {red_tiles[r]} and {red_tiles[c]}, with area={a}")
+
+def day_ten():
+    machines = []
+    with open("inputs/10") as file:
+        for line in file:
+            lights = re.findall(r"\[(.*)\]", line)[0]
+            buttons = re.findall(r"\((\d+(?:,\d+)*)\)", line)
+            joltage = re.findall(r"\{(.*)\}", line)[0]
+
+            lights = tuple([i for i, l in enumerate(lights) if l == '#'])
+            buttons = [[int(i) for i in button.split(',')] for button in buttons]
+            joltage = tuple([int(i) for i in joltage.split(',')])
+            machines.append((lights, buttons, joltage))
+
+    def check_lights(lights, buttons, _joltage):
+        for c in range(1, len(buttons)):
+            combs = combinations(buttons, c)
+            for comb in combs:
+                full_comb = [x for lst in comb for x in lst]
+                full_comb = Counter(full_comb)
+                odd = [k for k in full_comb if full_comb[k] % 2 == 1]
+
+                if (sorted(odd) == sorted(lights)):
+                    return c
+
+    r = sum([check_lights(*m) for m in machines])
+    print(f"The fewest total presses required to configure every machine indicator lights is {r}")
+
+    def check_joltage(_lights, buttons, joltage):
+        opt = z3.Optimize()
+        coefs = [z3.Int(f"c{i}") for i, _ in enumerate(buttons)]
+        for c in coefs: opt.add(c >= 0)
+
+        for i, j in enumerate(joltage):
+            opt.add(sum([coefs[bi] for bi, b in enumerate(buttons) if i in b]) == j)
+
+        opt.minimize(sum(coefs))
+        opt.check()
+        model = opt.model()
+        return sum([model[c].as_long() for c in model])
+
+    r = sum([check_joltage(*m) for m in machines])
+    print(f"The fewest total presses required to configure every machine joltage is {r}")
